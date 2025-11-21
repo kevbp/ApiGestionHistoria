@@ -15,7 +15,7 @@ public class ServicioGestionHistoria {
     DateTimeFormatter fmtFec = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     DateTimeFormatter fmtHor = DateTimeFormatter.ofPattern("HH:mm:ss");
 
-    public HistoriaDTO grabar(Entrada ent) {
+    public SalidaHistoria grabar(Entrada ent) {
 
         PacienteDTO pac = new PacienteDTO();
         pac.setNom(ent.getNom());
@@ -37,7 +37,7 @@ public class ServicioGestionHistoria {
         String urlHis = "http://ApiHistoria/historia/grabar";
         HistoriaDTO hisReg = resTem.postForObject(urlHis, his, HistoriaDTO.class);
 
-        return hisReg;
+        return buscar(hisReg.getId());
     }
     
     public SalidaHistoria buscar(Long id){
