@@ -1,5 +1,8 @@
 package Clinica.ApiGestionHistoria;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -9,23 +12,25 @@ public class ServicioGestionHistoria {
 
     @Autowired
     private RestTemplate resTem;
+    DateTimeFormatter fmtFec = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    DateTimeFormatter fmtHor = DateTimeFormatter.ofPattern("HH:mm:ss");
 
     public HistoriaDTO grabar(Entrada ent) {
-        String urlSal = "http://ApiNuevaHistoria/apiNuevaHistoria/salida";
-        SalidaDTO sal = resTem.getForObject(urlSal, SalidaDTO.class);
 
         PacienteDTO pac = new PacienteDTO();
-        pac.setNom(sal.getPac().getNom());
-        pac.setDni(sal.getPac().getDni());
-        pac.setPes(sal.getPac().getPes());
-        pac.setTal(sal.getPac().getTal());
-        pac.setEda(sal.getPac().getEda());
+        pac.setNom(ent.getNom());
+        pac.setDni(ent.getDni());
+        pac.setPes(ent.getPes());
+        pac.setTal(ent.getTal());
+        pac.setEda(ent.getEda());
         pac.setEst("Activo");
 
         String urlPac = "http://ApiPaciente/paciente/grabar";
         PacienteDTO pacReg = resTem.postForObject(urlPac, pac, PacienteDTO.class);
 
         HistoriaDTO his = new HistoriaDTO();
+        his.setFecCre(LocalDate.now().format(fmtFec));
+        his.setHorCre(LocalTime.now().format(fmtHor));
         his.setIdPac(pacReg.getId());
         his.setIdEmp(ent.getIdEmp());
 
@@ -33,6 +38,26 @@ public class ServicioGestionHistoria {
         HistoriaDTO hisReg = resTem.postForObject(urlHis, his, HistoriaDTO.class);
 
         return hisReg;
+    }
+    
+    public SalidaHistoria buscar(Long id){
+        String urlBusHis = "http://ApiHistoria/historia/buscar/" + id;
+        HistoriaDTO his = resTem.getForObject(urlBusHis, HistoriaDTO.class);
+        
+        String urlBusPac = "http://ApiPaciente/paciente/buscar/" + his.getIdPac();
+        String urlBusEmp = "http://ApiHistoria/historia/buscar/" + his.getIdEmp();
+        
+        PacienteDTO pac = resTem.getForObject(urlBusPac, PacienteDTO.class);
+        EmpleadoDTO emp = resTem.getForObject(urlBusEmp, EmpleadoDTO.class);
+        
+        SalidaHistoria salHis = new SalidaHistoria();
+        salHis.setIdHis(his.getId());
+        salHis.setFecCre(his.getFecCre());
+        salHis.setHorCre(his.getHorCre());
+        salHis.setPac(pac);
+        salHis.setEmp(emp);
+        
+        return salHis;
     }
 
 }

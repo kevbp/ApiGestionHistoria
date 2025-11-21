@@ -14,8 +14,8 @@ public class ApiGestionHistoria {
     @Autowired
     private ServicioGestionHistoria serv;
     
-    @PostMapping("/grabar")
-    public HistoriaDTO grabarHistoria(@RequestBody Entrada ent) {
+    @PostMapping("/procesarYGrabar")
+    public HistoriaDTO procesarYGrabar(@RequestBody Entrada ent) {
         return serv.grabar(ent);
     }
     
